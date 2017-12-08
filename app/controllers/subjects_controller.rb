@@ -1,5 +1,6 @@
 class SubjectsController < ApplicationController
   before_action :set_subject, only: [:show, :edit, :update, :destroy, :student]
+  before_action :authenticate_user!, expect: [:index, :show]
 
   # GET /subjects
   # GET /subjects.json
@@ -25,7 +26,7 @@ class SubjectsController < ApplicationController
   # POST /subjects
   # POST /subjects.json
   def create
-    @subject = Subject.new(subject_params)
+    @subject = Subject.new(subject_params.merge(user_id: current_user.id))
 
     respond_to do |format|
       if @subject.save
