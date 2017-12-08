@@ -2,5 +2,17 @@
 
 <%= render 'form', subject: @subject %>
 
+<ul>
+<% @subject.students.each do |student| %>
+ <li><%= student.name %> <%= link_to "remove", student_subject_path(@subject, student_id: student.id), method: :delete, data: { confirm: 'Are you sure?' }  %></li>
+<% end %>
+</ul>
+
+<%= form_for @subject, url: subject_path(@subject) do |f| %>
+  <%= collection_select(:subjects_students, :student_id, @students, :id, :name, prompt: true) %>
+
+  <%= f.submit "add student" %>
+<% end %>
+
 <%= link_to 'Show', @subject %> |
 <%= link_to 'Back', subjects_path %>

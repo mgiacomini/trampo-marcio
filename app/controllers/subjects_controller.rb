@@ -1,5 +1,5 @@
 class SubjectsController < ApplicationController
-  before_action :set_subject, only: [:show, :edit, :update, :destroy]
+  before_action :set_subject, only: [:show, :edit, :update, :destroy, :student]
 
   # GET /subjects
   # GET /subjects.json
@@ -19,6 +19,7 @@ class SubjectsController < ApplicationController
 
   # GET /subjects/1/edit
   def edit
+    @students = Student.all
   end
 
   # POST /subjects
@@ -41,13 +42,29 @@ class SubjectsController < ApplicationController
   # PATCH/PUT /subjects/1.json
   def update
     respond_to do |format|
-      if @subject.update(subject_params)
-        format.html { redirect_to @subject, notice: 'Subject was successfully updated.' }
+      if !params[:subjects_students].nil?
+        SubjectStudent.create student_id: student_params[:student_id], subject_id: @subject.id
+
+        format.html { redirect_to @subject, notice: 'Student was added' }
         format.json { render :show, status: :ok, location: @subject }
       else
-        format.html { render :edit }
-        format.json { render json: @subject.errors, status: :unprocessable_entity }
+        if @subject.update(subject_params)
+          format.html { redirect_to @subject, notice: 'Subject was successfully updated.' }
+          format.json { render :show, status: :ok, location: @subject }
+        else
+          format.html { render :edit }
+          format.json { render json: @subject.errors, status: :unprocessable_entity }
+        end
       end
+    end
+  end
+
+  def student
+    student = SubjectStudent.find_by student_id: params[:student_id], subject_id: @subject.id
+    student.destroy
+    respond_to do |format|
+      format.html { redirect_to edit_subject_url(@subject), notice: 'Student was removed.' }
+      format.json { head :no_content }
     end
   end
 
@@ -70,5 +87,9 @@ class SubjectsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def subject_params
       params.require(:subject).permit(:name, :teacher)
+    end
+
+    def student_params
+      params.require(:subjects_students).permit(:student_id)
     end
 end
